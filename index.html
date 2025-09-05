@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFH - Food From Home</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <i class="fas fa-utensils"></i>
+                FFH - Food From Home
+            </div>
+            <p class="tagline">La comida de tu restaurante favorito, en tu casa</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Página de selección de restaurante -->
+        <div id="restaurants-page" class="page active">
+            <h2>Selecciona un restaurante</h2>
+            <div class="restaurant-grid" id="restaurant-list">
+                <!-- Los restaurantes se cargarán aquí con JavaScript -->
+            </div>
+        </div>
+
+        <!-- Página de selección de platos -->
+        <div id="dishes-page" class="page">
+            <button class="back-button" id="back-to-restaurants">
+                <i class="fas fa-arrow-left"></i> Volver a restaurantes
+            </button>
+            <h2 id="restaurant-name">Menú del restaurante</h2>
+            <div class="dishes-container" id="dishes-list">
+                <!-- Los platos se cargarán aquí con JavaScript -->
+            </div>
+            <button class="checkout-button" id="go-to-checkout">Ver mi pedido</button>
+        </div>
+
+        <!-- Página de confirmación y datos -->
+        <div id="checkout-page" class="page">
+            <button class="back-button" id="back-to-dishes">
+                <i class="fas fa-arrow-left"></i> Volver al menú
+            </button>
+            <h2>Confirma tu pedido</h2>
+            
+            <div class="order-summary">
+                <h3 class="summary-title">Resumen de tu pedido</h3>
+                <div id="order-items">
+                    <!-- Los items del pedido se mostrarán aquí -->
+                </div>
+                <div class="order-total">
+                    <span>Total:</span>
+                    <span id="total-amount">$0.00</span>
+                </div>
+            </div>
+            
+            <h3>Datos de entrega</h3>
+            <form id="customer-form">
+                <div class="form-group">
+                    <label for="customer-name">Nombre completo *</label>
+                    <input type="text" id="customer-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="customer-phone">Número de teléfono *</label>
+                    <input type="tel" id="customer-phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="customer-address">Dirección de entrega *</label>
+                    <input type="text" id="customer-address" required>
+                </div>
+                <div class="form-group">
+                    <label for="customer-location">Localidad/Barrio *</label>
+                    <input type="text" id="customer-location" required>
+                </div>
+                <button type="button" class="whatsapp-button" id="send-whatsapp">
+                    <i class="fab fa-whatsapp"></i> Enviar pedido por WhatsApp
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
