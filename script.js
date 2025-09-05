@@ -1,44 +1,17 @@
 // Base de datos de restaurantes y platos
-const restaurants = [
-    {
-        id: 1,
-        name: "La Parrilla Argentina",
-        image: "https://images.unsplash.com/photo-1551782450-a2132b4ba21d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2069&q=80",
-        dishes: [
-            { id: 101, name: "Bife de Chorizo", price: 3500 },
-            { id: 102, name: "Asado de Tira", price: 2800 },
-            { id: 103, name: "Ensalada Mixta", price: 1200 },
-            { id: 104, name: "Papas Fritas", price: 900 }
-        ]
-    },
-    {
-        id: 2,
-        name: "Pizza Napoli",
-        image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1981&q=80",
-        dishes: [
-            { id: 201, name: "Pizza Margherita", price: 2200 },
-            { id: 202, name: "Pizza Napolitana", price: 2500 },
-            { id: 203, name: "Pizza Cuatro Quesos", price: 2800 },
-            { id: 204, name: "Calzone", price: 2300 }
-        ]
-    },
-    {
-        id: 3,
-        name: "Sushi Palace",
-        image: "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2127&q=80",
-        dishes: [
-            { id: 301, name: "Roll Philadelphia", price: 1800 },
-            { id: 302, name: "Roll California", price: 1600 },
-            { id: 303, name: "Sashimi Variado", price: 3200 },
-            { id: 304, name: "Tempura", price: 2100 }
-        ]
-    }
-];
+
+// Localidades predefinidas
+
+
+// Matriz de precios de delivery [restaurante][localidad]
+// Precios de ejemplo para testing
+
 
 // Variables globales
 let selectedRestaurant = null;
 let selectedDishes = [];
 let cart = [];
+let deliveryCost = 0;
 
 // Elementos del DOM
 const restaurantsPage = document.getElementById('restaurants-page');
@@ -48,15 +21,18 @@ const restaurantList = document.getElementById('restaurant-list');
 const restaurantName = document.getElementById('restaurant-name');
 const dishesList = document.getElementById('dishes-list');
 const orderItems = document.getElementById('order-items');
+const deliveryInfo = document.getElementById('delivery-info');
 const totalAmount = document.getElementById('total-amount');
 const backToRestaurants = document.getElementById('back-to-restaurants');
 const backToDishes = document.getElementById('back-to-dishes');
 const goToCheckout = document.getElementById('go-to-checkout');
 const sendWhatsapp = document.getElementById('send-whatsapp');
+const customerLocation = document.getElementById('customer-location');
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
     loadRestaurants();
+    loadLocalidades();
     setupEventListeners();
 });
 
@@ -82,6 +58,18 @@ function loadRestaurants() {
     });
 }
 
+// Cargar localidades en el selector
+function loadLocalidades() {
+    customerLocation.innerHTML = '<option value="">Selecciona una localidad</option>';
+    
+    localidades.forEach(localidad => {
+        const option = document.createElement('option');
+        option.value = localidad;
+        option.textContent = localidad;
+        customerLocation.appendChild(option);
+    });
+}
+
 // Configurar event listeners
 function setupEventListeners() {
     backToRestaurants.addEventListener('click', () => {
@@ -98,6 +86,9 @@ function setupEventListeners() {
     });
     
     sendWhatsapp.addEventListener('click', sendOrderViaWhatsapp);
+    
+    // Actualizar el costo de delivery cuando cambia la localidad
+    customerLocation.addEventListener('change', updateDeliveryCost);
 }
 
 // Seleccionar un restaurante
@@ -150,10 +141,32 @@ function toggleDishSelection(dish, button) {
     }
 }
 
+// Calcular costo de delivery basado en restaurante y localidad
+function calculateDeliveryCost() {
+    if (!selectedRestaurant || !customerLocation.value) {
+        return 0;
+    }
+    
+    const restaurantIndex = restaurants.findIndex(r => r.id === selectedRestaurant.id);
+    const locationIndex = localidades.findIndex(l => l === customerLocation.value);
+    
+    if (restaurantIndex >= 0 && locationIndex >= 0) {
+        return deliveryPrices[restaurantIndex][locationIndex];
+    }
+    
+    return 0;
+}
+
+// Actualizar el costo de delivery cuando cambia la localidad
+function updateDeliveryCost() {
+    deliveryCost = calculateDeliveryCost();
+    updateOrderSummary();
+}
+
 // Actualizar resumen del pedido
 function updateOrderSummary() {
     orderItems.innerHTML = '';
-    let total = 0;
+    let subtotal = 0;
     
     selectedDishes.forEach(dish => {
         const item = document.createElement('div');
@@ -163,8 +176,24 @@ function updateOrderSummary() {
             <span>$${dish.price}</span>
         `;
         orderItems.appendChild(item);
-        total += dish.price;
+        subtotal += dish.price;
     });
+    
+    // Calcular y mostrar delivery
+    deliveryCost = calculateDeliveryCost();
+    deliveryInfo.innerHTML = '';
+    
+    if (deliveryCost > 0) {
+        const deliveryItem = document.createElement('div');
+        deliveryItem.className = 'delivery-item';
+        deliveryItem.innerHTML = `
+            <span>Delivery a ${customerLocation.value || 'tu localidad'}</span>
+            <span>$${deliveryCost}</span>
+        `;
+        deliveryInfo.appendChild(deliveryItem);
+    }
+    
+    const total = subtotal + deliveryCost;
     
     totalAmount.textContent = `$${total}`;
 }
@@ -182,6 +211,10 @@ function sendOrderViaWhatsapp() {
         return;
     }
     
+    // Calcular subtotal
+    const subtotal = selectedDishes.reduce((sum, dish) => sum + dish.price, 0);
+    const total = subtotal + deliveryCost;
+    
     // Crear mensaje
     let message = `¡Hola! Quiero hacer un pedido de *${selectedRestaurant.name}*.\n\n`;
     message += `*Mi pedido:*\n`;
@@ -190,7 +223,12 @@ function sendOrderViaWhatsapp() {
         message += `- ${dish.name} ➞ $${dish.price}\n`;
     });
     
-    message += `\n*Total: $${totalAmount.textContent}*\n\n`;
+    // Agregar delivery al mensaje
+    if (deliveryCost > 0) {
+        message += `- Delivery a ${location} ➞ $${deliveryCost}\n`;
+    }
+    
+    message += `\n*Total: $${total}*\n\n`;
     message += `*Mis datos:*\n`;
     message += `Nombre: ${name}\n`;
     message += `Teléfono: ${phone}\n`;
@@ -201,7 +239,7 @@ function sendOrderViaWhatsapp() {
     const encodedMessage = encodeURIComponent(message);
     
     // Número de WhatsApp (reemplaza con tu número real)
-    const whatsappNumber = "5491112345678"; // Ejemplo: código país + código área + número
+    const whatsappNumber = "+5356272873"; // Ejemplo: código país + código área + número
     
     // Abrir WhatsApp
     window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, '_blank');

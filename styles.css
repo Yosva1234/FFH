@@ -200,6 +200,16 @@ header {
     border-bottom: 1px solid #eee;
 }
 
+.delivery-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 0;
+    font-weight: bold;
+    color: #27ae60;
+    border-top: 2px dashed #ddd;
+    border-bottom: 1px solid #eee;
+}
+
 .order-total {
     display: flex;
     justify-content: space-between;
@@ -222,7 +232,7 @@ header {
     color: #333;
 }
 
-.form-group input {
+.form-group input, .form-group select {
     width: 100%;
     padding: 12px 15px;
     border: 2px solid #ddd;
@@ -231,7 +241,7 @@ header {
     transition: border-color 0.3s ease;
 }
 
-.form-group input:focus {
+.form-group input:focus, .form-group select:focus {
     border-color: #f39c12;
     outline: none;
 }
